@@ -1,6 +1,6 @@
 # Словник даних (Data Dictionary)
 
-Документ описує структуру та атрибути вхідних даних проєкту CityFlow (CSV-файли / таблиці `core`), а також аналітичні об'єкти схеми `lab03_cf`.
+Документ описує структуру та атрибути даних проєкту CityFlow: таблиці ядра (`core.*`), аналітичні представлення (`lab03_cf.*`), а також таблиці ідемпотентного приймання та аудиту інгестії (`stg.ingestion_records`, `audit.ingestion_runs`).
 
 ## 1. Таблиця `core.customers`
 **Файл джерела:** `customers.csv`  
@@ -68,7 +68,7 @@
 | `line_total` | Підсумкова сума за позицією | `NUMERIC(12,2)` | `168.41` | Атрибут | Ні | `>= 0` |
 | `currency` | Валюта позиції | `TEXT` | `UAH` | Атрибут | Ні | Код валюти |
 
-## 6. Аналітичні об'єкти схеми `lab03_cf` (Лабораторна робота №3)
+## 6. Аналітичні об'єкти звітності та продуктивності (`sql/analyze/`)
 
 | Об'єкт | Тип | Grain (рівень деталізації рядка) | Ключові поля | Призначення |
 | :--- | :--- | :--- | :--- | :--- |
@@ -78,3 +78,35 @@
 | `lab03_cf.v_running_orders` | `VIEW` | `report_date × merchant_id × currency` (лише `delivered`) | `report_date`, `merchant_id`, `currency`, `order_amount`, `cumulative_amount` | Накопичувальний підсумок (`running total`) суми замовлень від початку місяця в розрізі закладу та валюти. |
 | `lab03_cf.v_latest_customer_order` | `VIEW` | Один клієнт (`customer_id`), активний у звітному місяці | `customer_id`, `order_id`, `merchant_id`, `created_at`, `order_status`, `currency`, `total_amount` | Визначає останнє створене замовлення клієнта за допомогою `ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY created_at DESC, order_id DESC)`. |
 | `lab03_cf.bench_orders` | `TABLE` | Одне замовлення (копія `core.orders`) | `order_id`, `merchant_id`, `created_at`, `total_amount` | Ізольована таблиця для експерименту з планами виконання та індексом `idx_lab03_cf_bench_merchant_created`. |
+
+## 7. Об'єкти приймання та аудиту інгестії (`sql/ingestion/`)
+
+### 7.1. Таблиця `stg.ingestion_records`
+**Джерела:** Файловий ZIP-пакет `cityflow_S03_batch_01_normal_v1.zip` (`orders`, `order_items`) та REST API `/api/v1/delivery-events` (`delivery_events`).  
+**Grain:** Один унікальний бізнес-запис джерела (`student_id × source × record_key`).
+
+| Поле | Опис | Тип даних (PostgreSQL) | Приклад значення | Тип атрибута | Обов'язкове | Обмеження / Примітки |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `student_id` | Ідентифікатор варіанта | `TEXT` | `S03` | Складений первинний ключ (PK) | Так | Частина `PRIMARY KEY (student_id, source, record_key)` |
+| `source` | Назва джерела даних | `TEXT` | `delivery_events` | Складений первинний ключ (PK) | Так | `CHECK (source IN ('orders', 'order_items', 'delivery_events'))` |
+| `record_key` | Бізнес-ключ запису | `TEXT` | `S03-E000001` | Складений первинний ключ (PK) | Так | `order_id`, `order_item_id` або `event_id` |
+| `payload` | Повний сирий запис у форматі JSON | `JSONB` | `{"event_id": "S03-E000001", ...}` | Атрибут | Так | Перевіряється на відсутність конфліктів вмісту при однаковому `record_key` |
+| `raw_path` | Шлях походження сирого артефакту | `TEXT` | `data/raw/ingestion/.../api` | Атрибут | Так | Вказує на ZIP-файл або каталог сирих сторінок API |
+| `source_row_number` | Порядковий номер запису у вхідному джерелі | `INTEGER` | `1` | Атрибут | Так | `CHECK (source_row_number > 0)` |
+| `first_run_id` | Ідентифікатор запуску, який вперше вставив запис | `UUID` | `aa2142a5-db97-...` | Зовнішній ключ (FK) | Так | Посилання на `audit.ingestion_runs(run_id)` |
+| `loaded_at` | Час першої вставки запису у staging | `TIMESTAMPTZ` | `2026-11-02 12:35:00+02` | Атрибут | Так | `DEFAULT clock_timestamp()` |
+
+### 7.2. Таблиця `audit.ingestion_runs`
+**Призначення:** Журнал виконання запусків модуля Ingestion (фіксує старт, успішне завершення та аварійні зупинки).  
+**Grain:** Один запуск конвеєра (`run_id`).
+
+| Поле | Опис | Тип даних (PostgreSQL) | Приклад значення | Тип атрибута | Обов'язкове | Обмеження / Примітки |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `run_id` | Унікальний ідентифікатор запуску | `UUID` | `c628d85e-5050-...` | Первинний ключ (PK) | Так | Генерується через `uuid.uuid4()` |
+| `student_id` | Ідентифікатор варіанта | `TEXT` | `S03` | Атрибут | Так | `S03` |
+| `status` | Підсумковий статус запуску | `TEXT` | `SUCCESS` | Атрибут | Так | `CHECK (status IN ('RUNNING', 'SUCCESS', 'FAILED'))` |
+| `started_at` | Час початку запуску | `TIMESTAMPTZ` | `2026-11-02 12:34:00+02` | Атрибут | Так | `DEFAULT clock_timestamp()` |
+| `finished_at` | Час завершення запуску | `TIMESTAMPTZ` | `2026-11-02 12:34:05+02` | Атрибут | Ні | Заповнюється при `SUCCESS` або `FAILED` |
+| `raw_dir` | Шлях до каталогу сирих артефактів запуску | `TEXT` | `data/raw/ingestion/c628d85e-...` | Атрибут | Так | Зберігає `source.zip`, `api/page_*.json`, `run.json`, `run.log` |
+| `summary` | JSON-підсумок кількостей за джерелами | `JSONB` | `{"orders": {"received": 420, ...}}` | Атрибут | Ні | Заповнюється при `SUCCESS` |
+| `error_code` | Короткий код помилки (у разі збою) | `TEXT` | `INJECTED_BEFORE_COMMIT` | Атрибут | Ні | Заповнюється при `FAILED` |
