@@ -6,3 +6,15 @@ data/raw/*
 !data/raw/README.md
 .DS_Store
 .idea/
+
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+.pytest_cache/
+data/variant/
+data/lab04_variant/
+data/raw/ingestion/
+data/raw/lab04/
+*.log
