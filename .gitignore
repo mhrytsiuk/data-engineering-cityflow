@@ -6,6 +6,7 @@ data/raw/*
 !data/raw/README.md
 .DS_Store
 .idea/
+runtime/
 
 .env
 .env.*

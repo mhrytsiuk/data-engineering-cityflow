@@ -1,0 +1,109 @@
+{
+  "contract_id": "cityflow_quality_contract",
+  "contract_version": "cityflow_v1",
+  "student_id": "S03",
+  "description": "Контракт автоматизованого контролю якості даних платформи CityFlow",
+  "expected_export_files": [
+    "core_customers.json",
+    "core_merchants.json",
+    "core_products.json",
+    "core_orders.json",
+    "core_order_items.json",
+    "api_orders.json",
+    "events.json"
+  ],
+  "allowed_currencies": ["UAH", "USD", "EUR"],
+  "allowed_order_statuses": [
+    "delivered",
+    "cancelled",
+    "refunded",
+    "partially_refunded",
+    "failed",
+    "in_progress"
+  ],
+  "allowed_event_types": [
+    "order_created",
+    "payment_confirmed",
+    "merchant_accepted",
+    "preparation_started",
+    "ready_for_pickup",
+    "courier_assigned",
+    "courier_picked_up",
+    "courier_arrived",
+    "delivered"
+  ],
+  "amount_tolerance": "0.01",
+  "freshness_max_days": 10,
+  "rules": [
+    {
+      "rule_id": "Q01",
+      "entity": "batch",
+      "severity": "BLOCK",
+      "reason_code": "EXPORT_INCOMPLETE_OR_CORRUPT",
+      "condition": "В експорті наявні всі 7 JSON-файлів із manifest.json; їхні SHA-256 та кількості рядків збігаються (або len(events) == expected_event_rows у fixture), і для кожної непорожньої сутності є принаймні один прийнятий запис."
+    },
+    {
+      "rule_id": "Q02",
+      "entity": "orders,order_items,events",
+      "severity": "REJECT",
+      "reason_code": "MISSING_OR_INVALID_ID",
+      "condition": "Обов'язкові ідентифікатори (order_id, customer_id, merchant_id, order_item_id, product_id, event_id) є непорожніми рядками (str), а не числами чи null."
+    },
+    {
+      "rule_id": "Q03",
+      "entity": "orders,order_items,events",
+      "severity": "REJECT",
+      "reason_code": "INVALID_TIMESTAMP_OR_NUMERIC",
+      "condition": "Часові мітки (created_at, occurred_at, available_at) парсяться як ISO-8601 timestamp із часовим поясом (offset або Z). Грошові поля є скінченними Decimal (не float/NaN/Inf); quantity є цілим числом > 0."
+    },
+    {
+      "rule_id": "Q04",
+      "entity": "orders,order_items",
+      "severity": "REJECT",
+      "reason_code": "DOMAIN_VALUE_NOT_ALLOWED",
+      "condition": "Валюта належить {UAH, USD, EUR}; усі грошові суми >= 0; статус замовлення належить {delivered, cancelled, refunded, partially_refunded, failed, in_progress}."
+    },
+    {
+      "rule_id": "Q05",
+      "entity": "orders,order_items,events",
+      "severity": "DUPLICATE",
+      "reason_code": "EXACT_DUPLICATE",
+      "condition": "Записи з однаковим бізнес-ключем і однаковими нормалізованими бізнес-полями: перший за (source_name, source_row_no) приймається (accepted), решта позначаються як duplicate."
+    },
+    {
+      "rule_id": "Q06",
+      "entity": "orders,order_items,events",
+      "severity": "REJECT",
+      "reason_code": "CONFLICTING_DUPLICATE_KEY",
+      "condition": "Записи з однаковим бізнес-ключем, але різними нормалізованими бізнес-значеннями без достовірної версії: уся конфліктна група відхиляється (rejected)."
+    },
+    {
+      "rule_id": "Q07",
+      "entity": "orders,order_items,events",
+      "severity": "REJECT",
+      "reason_code": "FOREIGN_KEY_OR_PARENT_REJECTED",
+      "condition": "Замовлення посилаються на наявні core.customers і core.merchants; позиції — на прийняті замовлення і core.products; події — на прийняті замовлення (при відхиленому замовленні вказується PARENT_REJECTED)."
+    },
+    {
+      "rule_id": "Q08",
+      "entity": "events",
+      "severity": "REJECT",
+      "reason_code": "EVENT_TYPE_NOT_ALLOWED",
+      "condition": "Подія доставки має payload_version = 1, дозволений event_type та непорожні обов'язкові поля delivery_id, occurred_at, available_at."
+    },
+    {
+      "rule_id": "Q09",
+      "entity": "orders",
+      "severity": "WARN",
+      "reason_code": "ORDER_TOTAL_MISMATCH_WARN",
+      "condition": "Діагностика розбіжності суми: abs(total_amount - (subtotal_amount + delivery_fee - discount_amount)) > 0.01 без перезапису суми джерела."
+    },
+    {
+      "rule_id": "Q10",
+      "entity": "events",
+      "severity": "WARN",
+      "reason_code": "STALE_EVENTS_WARN",
+      "condition": "Перевірка свіжості даних відносно reference_time: reference_time - max(available_at) > 10 днів."
+    }
+  ]
+}

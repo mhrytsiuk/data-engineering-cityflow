@@ -1,0 +1,21 @@
+{
+  "normal": {
+    "input": 24,
+    "accepted": 24,
+    "rejected": 0,
+    "duplicate": 0
+  },
+  "mixed": {
+    "input": 30,
+    "accepted": 23,
+    "rejected": 6,
+    "duplicate": 1
+  },
+  "incomplete": {
+    "input": 23,
+    "expected": 24,
+    "batch_status": "BLOCKED",
+    "publish": false
+  },
+  "note": "Це відкриті контрольні результати тестових сценаріїв; не hardcode результатів у реалізації."
+}
