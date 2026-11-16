@@ -1,8 +1,8 @@
 # Словник даних (Data Dictionary)
 
-Документ описує структуру та атрибути даних проєкту CityFlow: таблиці ядра (`core.*`), аналітичні представлення (`lab03_cf.*`), а також таблиці ідемпотентного приймання та аудиту інгестії (`stg.ingestion_records`, `audit.ingestion_runs`).
+Документ описує структуру та атрибути даних проєкту CityFlow: таблиці ядра (`core.*`), аналітичні представлення (`lab03_cf.*`), таблиці приймання та аудиту інгестії (`stg.ingestion_records`, `audit.ingestion_runs`, `ingestion_stg.*`), а також об'єкти автоматизованого контролю якості даних, карантину та валідованого шару (`quality.*`, `quarantine.*`, `validated.*`).
 
-## 1. Таблиця `core.customers`
+## Таблиця `core.customers`
 **Файл джерела:** `customers.csv`  
 **Grain:** Один унікальний зареєстрований клієнт.
 
@@ -13,7 +13,7 @@
 | `city` | Місто клієнта | `TEXT` | `Lviv` | Атрибут | Так | Текстове поле |
 | `registered_at` | Дата та час реєстрації акаунту | `TIMESTAMPTZ` | `2025-08-15 08:30:00+03` | Атрибут | Так | Валідна часова мітка |
 
-## 2. Таблиця `core.merchants`
+## Таблиця `core.merchants`
 **Файл джерела:** `merchants.csv`  
 **Grain:** Один унікальний заклад-партнер.
 
@@ -24,7 +24,7 @@
 | `city` | Місто розташування закладу | `TEXT` | `Lviv` | Атрибут | Так | Текстове поле |
 | `opened_at` | Дата та час приєднання до платформи | `TIMESTAMPTZ` | `2025-05-10 10:00:00+03` | Атрибут | Так | Валідна часова мітка |
 
-## 3. Таблиця `core.products`
+## Таблиця `core.products`
 **Файл джерела:** `products.csv`  
 **Grain:** Один унікальний товар у меню закладу.
 
@@ -36,7 +36,7 @@
 | `unit_price_uah` | Ціна за одиницю товару в UAH | `NUMERIC(12,2)` | `85.00` | Атрибут | Так | `CHECK (unit_price_uah > 0)` |
 | `is_active` | Прапорець активності товару в меню | `BOOLEAN` | `true` | Атрибут | Так | `true` / `false` |
 
-## 4. Таблиця `core.orders`
+## Таблиця `core.orders`
 **Файл джерела:** `orders.csv`  
 **Grain:** Одне унікальне замовлення клієнта.
 
@@ -53,7 +53,7 @@
 | `discount_amount` | Сума знижки | `NUMERIC(12,2)` | `0.00` | Атрибут | Так | `>= 0` |
 | `total_amount` | Загальна сума замовлення | `NUMERIC(12,2)` | `295.00` | Атрибут | Так | `>= 0` |
 
-## 5. Таблиця `core.order_items`
+## Таблиця `core.order_items`
 **Файл джерела:** `order_items.csv`  
 **Grain:** Окрема товарна позиція в межах замовлення.
 
@@ -68,7 +68,7 @@
 | `line_total` | Підсумкова сума за позицією | `NUMERIC(12,2)` | `168.41` | Атрибут | Ні | `>= 0` |
 | `currency` | Валюта позиції | `TEXT` | `UAH` | Атрибут | Ні | Код валюти |
 
-## 6. Аналітичні об'єкти звітності та продуктивності (`sql/analyze/`)
+## Аналітичні об'єкти звітності та продуктивності (`sql/analyze/`)
 
 | Об'єкт | Тип | Grain (рівень деталізації рядка) | Ключові поля | Призначення |
 | :--- | :--- | :--- | :--- | :--- |
@@ -79,34 +79,22 @@
 | `lab03_cf.v_latest_customer_order` | `VIEW` | Один клієнт (`customer_id`), активний у звітному місяці | `customer_id`, `order_id`, `merchant_id`, `created_at`, `order_status`, `currency`, `total_amount` | Визначає останнє створене замовлення клієнта за допомогою `ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY created_at DESC, order_id DESC)`. |
 | `lab03_cf.bench_orders` | `TABLE` | Одне замовлення (копія `core.orders`) | `order_id`, `merchant_id`, `created_at`, `total_amount` | Ізольована таблиця для експерименту з планами виконання та індексом `idx_lab03_cf_bench_merchant_created`. |
 
-## 7. Об'єкти приймання та аудиту інгестії (`sql/ingestion/`)
+## Об'єкти приймання та аудиту інгестії (`sql/ingestion/`)
 
-### 7.1. Таблиця `stg.ingestion_records`
-**Джерела:** Файловий ZIP-пакет `cityflow_S03_batch_01_normal_v1.zip` (`orders`, `order_items`) та REST API `/api/v1/delivery-events` (`delivery_events`).  
-**Grain:** Один унікальний бізнес-запис джерела (`student_id × source × record_key`).
+| Об'єкт | Тип | Grain (рівень деталізації рядка) | Ключові поля | Призначення |
+| :--- | :--- | :--- | :--- | :--- |
+| `stg.ingestion_records` | `TABLE` | `student_id × source × record_key` | `student_id`, `source`, `record_key`, `payload`, `raw_path`, `source_row_number`, `first_run_id`, `loaded_at` | Ідемпотентне зберігання сирих записів із ZIP-пакета (`orders`, `order_items`) та REST API (`delivery_events`). |
+| `audit.ingestion_runs` | `TABLE` | Один запуск конвеєра інгестії (`run_id`) | `run_id`, `student_id`, `status`, `started_at`, `finished_at`, `raw_dir`, `summary`, `error_code` | Журнал виконання запусків інгестії зі статусами `RUNNING`, `SUCCESS`, `FAILED`. |
+| `ingestion_stg.orders` / `delivery_events` | `TABLE` | Одне замовлення (`order_id`) / подія доставки (`event_id`) | `student_id`, `order_id` / `event_id`, `payload` | JSONB-зріз замовлень і подій доставки для експорту та перевірки контракту якості. |
 
-| Поле | Опис | Тип даних (PostgreSQL) | Приклад значення | Тип атрибута | Обов'язкове | Обмеження / Примітки |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `student_id` | Ідентифікатор варіанта | `TEXT` | `S03` | Складений первинний ключ (PK) | Так | Частина `PRIMARY KEY (student_id, source, record_key)` |
-| `source` | Назва джерела даних | `TEXT` | `delivery_events` | Складений первинний ключ (PK) | Так | `CHECK (source IN ('orders', 'order_items', 'delivery_events'))` |
-| `record_key` | Бізнес-ключ запису | `TEXT` | `S03-E000001` | Складений первинний ключ (PK) | Так | `order_id`, `order_item_id` або `event_id` |
-| `payload` | Повний сирий запис у форматі JSON | `JSONB` | `{"event_id": "S03-E000001", ...}` | Атрибут | Так | Перевіряється на відсутність конфліктів вмісту при однаковому `record_key` |
-| `raw_path` | Шлях походження сирого артефакту | `TEXT` | `data/raw/ingestion/.../api` | Атрибут | Так | Вказує на ZIP-файл або каталог сирих сторінок API |
-| `source_row_number` | Порядковий номер запису у вхідному джерелі | `INTEGER` | `1` | Атрибут | Так | `CHECK (source_row_number > 0)` |
-| `first_run_id` | Ідентифікатор запуску, який вперше вставив запис | `UUID` | `aa2142a5-db97-...` | Зовнішній ключ (FK) | Так | Посилання на `audit.ingestion_runs(run_id)` |
-| `loaded_at` | Час першої вставки запису у staging | `TIMESTAMPTZ` | `2026-11-02 12:35:00+02` | Атрибут | Так | `DEFAULT clock_timestamp()` |
+## Об'єкти контролю якості даних, карантину та валідованого шару (`sql/quality/00_schema.sql`)
 
-### 7.2. Таблиця `audit.ingestion_runs`
-**Призначення:** Журнал виконання запусків модуля Ingestion (фіксує старт, успішне завершення та аварійні зупинки).  
-**Grain:** Один запуск конвеєра (`run_id`).
-
-| Поле | Опис | Тип даних (PostgreSQL) | Приклад значення | Тип атрибута | Обов'язкове | Обмеження / Примітки |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `run_id` | Унікальний ідентифікатор запуску | `UUID` | `c628d85e-5050-...` | Первинний ключ (PK) | Так | Генерується через `uuid.uuid4()` |
-| `student_id` | Ідентифікатор варіанта | `TEXT` | `S03` | Атрибут | Так | `S03` |
-| `status` | Підсумковий статус запуску | `TEXT` | `SUCCESS` | Атрибут | Так | `CHECK (status IN ('RUNNING', 'SUCCESS', 'FAILED'))` |
-| `started_at` | Час початку запуску | `TIMESTAMPTZ` | `2026-11-02 12:34:00+02` | Атрибут | Так | `DEFAULT clock_timestamp()` |
-| `finished_at` | Час завершення запуску | `TIMESTAMPTZ` | `2026-11-02 12:34:05+02` | Атрибут | Ні | Заповнюється при `SUCCESS` або `FAILED` |
-| `raw_dir` | Шлях до каталогу сирих артефактів запуску | `TEXT` | `data/raw/ingestion/c628d85e-...` | Атрибут | Так | Зберігає `source.zip`, `api/page_*.json`, `run.json`, `run.log` |
-| `summary` | JSON-підсумок кількостей за джерелами | `JSONB` | `{"orders": {"received": 420, ...}}` | Атрибут | Ні | Заповнюється при `SUCCESS` |
-| `error_code` | Короткий код помилки (у разі збою) | `TEXT` | `INJECTED_BEFORE_COMMIT` | Атрибут | Ні | Заповнюється при `FAILED` |
+| Об'єкт | Тип | Grain (рівень деталізації рядка) | Ключові поля | Призначення |
+| :--- | :--- | :--- | :--- | :--- |
+| `quality.runs` | `TABLE` | Один запуск перевірки якості (`run_id`) | `run_id`, `student_id`, `scope`, `reference_time`, `contract_version`, `status`, `started_at`, `finished_at`, `source_manifest`, `error_code` | Журнал запусків контролю якості (`RUNNING`, `PASS`, `WARN`, `BLOCKED`, `FAILED`). |
+| `quality.row_decisions` | `TABLE` | Один вхідний запис джерела (`run_id × source_name × source_row_no`) | `run_id`, `source_name`, `source_row_no`, `business_key`, `decision`, `reason_codes` | Поелементне рішення (`accepted`, `rejected`, `duplicate`) та коди причин для кожного вхідного запису. |
+| `quality.rule_results` | `TABLE` | Одне правило контракту в запуску (`run_id × rule_id`) | `run_id`, `rule_id`, `severity`, `failed_count`, `details` | Кількість спрацювань і деталі кожного правила `Q01`–`Q10` (`BLOCK`, `REJECT`, `DUPLICATE`, `WARN`). |
+| `quarantine.records` | `TABLE` | Один відхилений запис (`run_id × source_name × source_row_no`) | `run_id`, `source_name`, `source_row_no`, `payload`, `reason_codes` | Ізольоване збереження повного первинного JSON-payload кожного `rejected` запису разом із причинами відхилення. |
+| `validated.orders` | `TABLE` | Одне прийняте замовлення (`order_id`) | `order_id`, `customer_id`, `merchant_id`, `created_at`, `order_status`, `currency`, `subtotal_amount`, `delivery_fee`, `discount_amount`, `total_amount`, `quality_run_id` | Останній успішно опублікований зріз валідованих замовлень (`core` + `api_orders`). |
+| `validated.order_items` | `TABLE` | Одна прийнята позиція замовлення (`order_item_id`) | `order_item_id`, `order_id`, `product_id`, `quantity`, `unit_price`, `line_discount`, `line_total`, `currency`, `quality_run_id` | Останній успішно опублікований зріз валідованих позицій замовлень із перевіреними FK на `validated.orders`. |
+| `validated.delivery_events` | `TABLE` | Одна прийнята подія доставки (`event_id`) | `event_id`, `delivery_id`, `order_id`, `event_type`, `occurred_at`, `available_at`, `courier_id`, `service_zone_id`, `payload_version`, `payload`, `quality_run_id` | Останній успішно опублікований зріз валідованих подій доставки з посиланням на `validated.orders`. |
