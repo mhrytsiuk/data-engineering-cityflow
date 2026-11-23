@@ -1,0 +1,31 @@
+source_batch_id,source_available_at,product_id,merchant_id,product_name,category,unit_price_uah,is_active,updated_at,change_type
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000477,S03-M00040,Espresso,coffee,53.11,True,2026-09-24T15:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000072,S03-M00007,Veggie Roll,sushi,354.86,True,2026-09-22T21:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000413,S03-M00034,Apple Pie,desserts,95.78,True,2026-09-24T14:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000121,S03-M00010,Orange Juice,beverages,88.28,True,2026-09-24T17:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000299,S03-M00025,Baguette,bread,34.01,True,2026-09-22T11:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000505,S03-M00042,California Roll,sushi,351.12,True,2026-09-25T07:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000137,S03-M00012,Four Cheese,pizza,318.46,True,2026-09-24T00:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000492,S03-M00041,Danish,pastries,84.52,True,2026-09-23T06:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000077,S03-M00007,Margherita,pizza,340.07,False,2026-09-22T08:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000205,S03-M00018,Margherita,pizza,344.28,True,2026-09-24T04:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000304,S03-M00026,Juice,beverages,168.28,False,2026-09-24T19:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000172,S03-M00015,Dish Soap,household,297.94,True,2026-09-23T17:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000302,S03-M00026,Chocolate,snacks,48.74,True,2026-09-23T10:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000020,S03-M00002,Apples 1kg,produce,49.27,False,2026-09-24T22:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000185,S03-M00016,Apple Pie,desserts,130.35,False,2026-09-22T14:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000277,S03-M00024,Baby Wipes,baby_care,350.56,True,2026-09-23T06:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000426,S03-M00035,Salmon Roll,sushi,435.77,True,2026-09-24T11:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000398,S03-M00032,Baguette,bakery,77.28,False,2026-09-22T09:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000266,S03-M00023,Tea,beverages,62.16,True,2026-09-24T13:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000292,S03-M00025,Baguette,bread,52.89,False,2026-09-24T22:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000071,S03-M00007,California Roll,sushi,377.02,True,2026-09-24T09:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000274,S03-M00023,Baguette,bakery,48.61,False,2026-09-22T15:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000103,S03-M00009,Nuts,snacks,26.67,True,2026-09-25T03:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000259,S03-M00022,Caesar Salad,salads,269.71,True,2026-09-23T12:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000284,S03-M00024,Baby Shampoo,baby_care,282.94,True,2026-09-23T07:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000228,S03-M00020,Baby Wipes,baby_care,480.48,True,2026-09-23T17:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000058,S03-M00006,Cleaning Spray,household,101.44,True,2026-09-24T07:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000183,S03-M00016,Veggie Roll,sushi,641.37,True,2026-09-23T18:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000035,S03-M00004,Chicken Pizza,pizza,332.12,True,2026-09-23T04:00:00Z,price_or_status_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-P000482,S03-M00040,Honey Cake,cakes,270.67,True,2026-09-24T16:00:00Z,price_or_status_change

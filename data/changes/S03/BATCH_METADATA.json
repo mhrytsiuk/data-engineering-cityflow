@@ -1,0 +1,9 @@
+{
+  "batch_id": "batch_03_dimensions",
+  "kind": "dimension_changes",
+  "event_time_period": [
+    "2026-09-15",
+    "2026-09-21"
+  ],
+  "source_available_at": "2026-09-22T08:00:00Z"
+}

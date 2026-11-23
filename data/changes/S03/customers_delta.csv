@@ -1,0 +1,19 @@
+source_batch_id,source_available_at,customer_id,full_name,email,phone,city,service_zone_id,registered_at,customer_status,updated_at,change_type
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-C000708,Andrii Kravets,s03.customer000708@example.test,+380732911135,Kyiv,KYI-Z01,2025-11-11T14:41:22.723048876Z,active,2026-09-23T06:00:00Z,address_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-C000482,Ivan Melnyk,s03.customer000482@example.test,+380505041476,Dnipro,DNI-Z02,2026-08-16T08:54:05.401060726Z,active,2026-09-24T01:00:00Z,address_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-C000649,Maksym Oliinyk,s03.customer000649@example.test,+380978651397,Kharkiv,KHA-Z03,2024-09-22T23:21:05.375797842Z,active,2026-09-23T09:00:00Z,address_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-C000299,Yaroslav Petrenko,s03.customer000299@example.test,+380935294529,Odesa,ODE-Z02,2025-01-07T06:41:45.080486389Z,active,2026-09-22T19:00:00Z,address_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-C000317,Pavlo Kuzmenko,s03.customer000317@example.test,+380679772247,Odesa,ODE-Z01,2024-06-12T03:49:46.420810579Z,active,2026-09-23T23:00:00Z,address_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-C000721,Ivan Koval,s03.customer000721@example.test,+380990231609,Lviv,LVI-Z02,2026-05-18T02:01:26.275161784Z,active,2026-09-23T08:00:00Z,address_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-C000711,Olena Zakharchenko,s03.customer000711@example.test,+380977752411,Lviv,LVI-Z01,2025-05-18T21:08:17.771791659Z,active,2026-09-23T14:00:00Z,address_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-C000731,Ivan Voloshyn,s03.customer000731@example.test,+380661044321,Kyiv,KYI-Z03,2026-07-19T06:48:42.005784184Z,active,2026-09-24T22:00:00Z,address_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-C000056,Tetiana Polishchuk,s03.customer000056@example.test,+380983196169,Odesa,ODE-Z02,2024-10-28T08:35:35.976914074Z,active,2026-09-23T07:00:00Z,address_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-C000415,Volodymyr Oliinyk,s03.customer000415@example.test,+380985788638,Odesa,ODE-Z01,2025-04-25T22:12:47.316086192Z,suspended,2026-09-24T07:00:00Z,address_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-C000725,Volodymyr Bondarenko,s03.customer000725@example.test,+380956599521,Lviv,LVI-Z02,2024-05-29T04:00:48.498389568Z,inactive,2026-09-22T21:00:00Z,address_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-C000697,Viktor Kravchenko,s03.customer000697@example.test,+380993806805,Kyiv,KYI-Z04,2025-03-28T15:05:56.340265406Z,active,2026-09-23T23:00:00Z,address_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-C000149,Danylo Romanenko,s03.customer000149@example.test,+380989565437,Kyiv,KYI-Z04,2024-04-29T03:57:10.565539620Z,inactive,2026-09-23T10:00:00Z,address_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-C000034,Pavlo Kravets,s03.customer000034@example.test,+380978656944,Kyiv,KYI-Z04,2026-02-20T20:49:20.753812943Z,active,2026-09-22T23:00:00Z,address_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-C000019,Marko Lysenko,s03.customer000019@example.test,+380674544240,Lviv,LVI-Z03,2024-04-18T10:19:25.452814122Z,active,2026-09-24T12:00:00Z,address_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-C000612,Danylo Shevchenko,s03.customer000612@example.test,+380975685167,Dnipro,DNI-Z03,2026-06-28T10:03:17.191916953Z,active,2026-09-25T01:00:00Z,address_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-C000007,Tetiana Savchenko,s03.customer000007@example.test,+380664403639,Kyiv,KYI-Z03,2026-05-16T13:38:38.234751767Z,active,2026-09-24T22:00:00Z,address_change
+batch_03_dimensions,2026-09-22T08:00:00Z,S03-C000042,Sofiia Vasylenko,s03.customer000042@example.test,+380684508104,Lviv,LVI-Z02,2024-08-10T16:22:20.689497920Z,active,2026-09-24T01:00:00Z,address_change
