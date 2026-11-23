@@ -1,4 +1,7 @@
-"""CLI-точка входу: python -m pipeline quality --student S03 --input runtime/source_01 --reference-time ..."""
+"""CLI-точка входу пакета CityFlow:
+- python -m pipeline quality --student S03 --input runtime/source_01 --reference-time ...
+- python -m pipeline warehouse --student S03 [--changes data/changes/S03]
+"""
 
 from __future__ import annotations
 
@@ -15,24 +18,10 @@ from .validator import (
     validate_export_directory,
     validate_fixture_file,
 )
+from .warehouse import run_warehouse_load
 
 
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="pipeline", description="CityFlow Data Quality Pipeline")
-    subparsers = parser.add_subparsers(dest="command", required=True)
-
-    q_parser = subparsers.add_parser("quality", help="Run automated data quality checks and publish validated data")
-    q_parser.add_argument("--student", required=True, help="Student ID (e.g. S03)")
-    q_parser.add_argument("--input", required=True, type=Path, help="Export directory or fixture JSON file")
-    q_parser.add_argument("--reference-time", required=True, help="Reference ISO timestamp with offset/Z")
-    q_parser.add_argument("--scope", choices=["project", "test"], default=None, help="Execution scope")
-    q_parser.add_argument("--dry-run", action="store_true", help="Validate without publishing to validated.*")
-    q_parser.add_argument("--no-db", action="store_true", help="Run in memory only without database connection")
-    q_parser.add_argument("--fail-before-commit", action="store_true", help="Simulate failure before COMMIT")
-    q_parser.add_argument("--contract", type=Path, default=None, help="Path to contract JSON")
-    q_parser.add_argument("--report-out", type=Path, default=None, help="Path to write JSON summary report")
-
-    args = parser.parse_args(argv)
+def _run_quality_command(args: argparse.Namespace) -> int:
     run_id = str(uuid.uuid4())
 
     ref_dt = parse_iso_timestamptz(args.reference_time)
@@ -153,6 +142,64 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 1
+
+
+def _run_warehouse_command(args: argparse.Namespace) -> int:
+    try:
+        dsn = resolve_dsn()
+        summary = run_warehouse_load(
+            dsn,
+            student_id=args.student,
+            changes_dir=args.changes,
+        )
+        if args.report_out is not None:
+            args.report_out.parent.mkdir(parents=True, exist_ok=True)
+            args.report_out.write_text(
+                json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
+        return 0
+    except Exception as exc:
+        print(
+            json.dumps(
+                {
+                    "status": "FAILED",
+                    "error": f"{type(exc).__name__}: {exc}",
+                },
+                ensure_ascii=False,
+            ),
+            file=sys.stderr,
+        )
+        return 1
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(prog="pipeline", description="CityFlow Data Engineering Pipeline")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    q_parser = subparsers.add_parser("quality", help="Run automated data quality checks and publish validated data")
+    q_parser.add_argument("--student", required=True, help="Student ID (e.g. S03)")
+    q_parser.add_argument("--input", required=True, type=Path, help="Export directory or fixture JSON file")
+    q_parser.add_argument("--reference-time", required=True, help="Reference ISO timestamp with offset/Z")
+    q_parser.add_argument("--scope", choices=["project", "test"], default=None, help="Execution scope")
+    q_parser.add_argument("--dry-run", action="store_true", help="Validate without publishing to validated.*")
+    q_parser.add_argument("--no-db", action="store_true", help="Run in memory only without database connection")
+    q_parser.add_argument("--fail-before-commit", action="store_true", help="Simulate failure before COMMIT")
+    q_parser.add_argument("--contract", type=Path, default=None, help="Path to contract JSON")
+    q_parser.add_argument("--report-out", type=Path, default=None, help="Path to write JSON summary report")
+
+    w_parser = subparsers.add_parser("warehouse", help="Load and update CityFlow analytical data warehouse (dwh.*)")
+    w_parser.add_argument("--student", required=True, help="Student ID (e.g. S03)")
+    w_parser.add_argument("--changes", type=Path, default=None, help="Directory with customers_delta.csv and products_delta.csv")
+    w_parser.add_argument("--report-out", type=Path, default=None, help="Optional path to write JSON summary report")
+
+    args = parser.parse_args(argv)
+    if args.command == "quality":
+        return _run_quality_command(args)
+    if args.command == "warehouse":
+        return _run_warehouse_command(args)
+    return 1
 
 
 if __name__ == "__main__":
